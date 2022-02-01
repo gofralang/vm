@@ -21,7 +21,7 @@ int vm_execute_operation(std::vector<char*> bytecode, size_t current_index, char
 	//}
 	
 	printf("`%s`\n", operation);
-	return current_index;
+	return ++current_index;
 }
 
 void vm_execute_bytecode(std::vector<char*>* bytecode_ptr){
