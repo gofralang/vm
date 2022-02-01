@@ -4,6 +4,7 @@
 #include <bits/stdc++.h> 
 #include <bits/stl_bvector.h>
 #include <stack>
+#include <sstream>
 
 // WARN. WORK IN PROGRESS.
 // THIS IS TEST CODE.
@@ -14,22 +15,44 @@
 
 using namespace std;
 
-int vm_execute_operation(stack<int>* memory_stack, std::vector<char*> bytecode, size_t current_index, char* operation){
+int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int current_index, char* operation){
 	
-	//if (strcmp(operation, "SP_I")){
-	//	char* operand = bytecode[current_index + 1];
-	//	current_index++;
-	//}else{
-	//	current_index++;
-	//}
+	if (strcmp(operation, "SP_I") == 0){
+		char* operand = bytecode[current_index + 1];
+		
+		stringstream ss;
+		int num;
+		ss << operand;
+		ss >> num;
+		
+		memory_stack->push(num);
+		return current_index + 2;
+	}
 	
-	printf("`%s`\n", operation);
+	if (strcmp(operation, "I+") == 0){
+		int operand_a = memory_stack->top();
+		memory_stack->pop();
+		int operand_b = memory_stack->top();
+		memory_stack->pop();
+		
+		memory_stack->push(operand_b + operand_a);
+		return current_index + 1;
+	}
+	
+	if (strcmp(operation, "I_SHOW") == 0){
+		int operand = memory_stack->top();
+		memory_stack->pop();
+		printf("%d\n", operand);
+		return current_index + 1;
+	}
+	
+	printf("Error! Got unexpected bytecode VM operation: `%s`\n", operation);
 	return ++current_index;
 }
 
 void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	fputs("[Gofra VM] Executing bytecode...\n", stdout);
-	size_t current_operation_index = 0;
+	int current_operation_index = 0;
 	int size = bytecode_ptr->size();
 	
 	
