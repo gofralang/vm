@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <vector>
-#include <string>
 #include <bits/stdc++.h> 
 #include <bits/stl_bvector.h>
 #include <stack>
