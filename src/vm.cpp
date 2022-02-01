@@ -3,6 +3,7 @@
 #include <string>
 #include <bits/stdc++.h> 
 #include <bits/stl_bvector.h>
+#include <stack>
 
 // WARN. WORK IN PROGRESS.
 // THIS IS TEST CODE.
@@ -11,7 +12,9 @@
 #define VM_BYTECODE_BUFFER_SIZE 2048
 #define VM_BYTECODE_TOKEN_BUFFER_SIZE 64
 
-int vm_execute_operation(std::vector<char*> bytecode, size_t current_index, char* operation){
+using namespace std;
+
+int vm_execute_operation(stack<int>* memory_stack, std::vector<char*> bytecode, size_t current_index, char* operation){
 	
 	//if (strcmp(operation, "SP_I")){
 	//	char* operand = bytecode[current_index + 1];
@@ -24,14 +27,17 @@ int vm_execute_operation(std::vector<char*> bytecode, size_t current_index, char
 	return ++current_index;
 }
 
-void vm_execute_bytecode(std::vector<char*>* bytecode_ptr){
+void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	fputs("[Gofra VM] Executing bytecode...\n", stdout);
 	size_t current_operation_index = 0;
 	int size = bytecode_ptr->size();
+	
+	
 	printf("[Gofra VM] Bytecode has %d operators!\n", size);
-	std::vector<char*> bytecode = *bytecode_ptr;
+	stack<int> memory_stack;
+	vector<char*> bytecode = *bytecode_ptr;
 	while (current_operation_index < size){
-		current_operation_index = vm_execute_operation(bytecode, current_operation_index, bytecode[current_operation_index]);
+		current_operation_index = vm_execute_operation(&memory_stack, bytecode, current_operation_index, bytecode[current_operation_index]);
 	}
 	fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
 }
@@ -45,7 +51,7 @@ int vm_execute_file(char* bytecode_path){
 		return 1;
 	}
 	
-	std::vector<char*> bytecode;
+	vector<char*> bytecode;
 	char* token = NULL;
 	char line_buffer[VM_BYTECODE_READ_BUFFER_SIZE];
 	fputs("[Gofra VM] Reading bytecode file...\n", stdout);
