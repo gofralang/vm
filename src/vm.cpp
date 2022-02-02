@@ -12,9 +12,75 @@
 
 using namespace std;
 
+// VM Operations.
+void vm_op_plus(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b + a);
+}
+void vm_op_minus(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b - a);
+}
+void vm_op_dec(stack<int>* s){
+	int a = s->top(); s->pop();
+	s->push(--a);
+}
+void vm_op_inc(stack<int>* s){
+	int a = s->top(); s->pop();
+	s->push(++a);
+}
+void vm_op_div(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b / a);
+}
+void vm_op_mul(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b * a);
+}
+void vm_op_eq(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b == a);
+}
+void vm_op_ne(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b != a);
+}
+void vm_op_gt(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b > a);
+}
+void vm_op_lt(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b < a);
+}
+void vm_op_geq(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b >= a);
+}
+void vm_op_leq(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b <= a);
+}
+void vm_op_mod(stack<int>* s){
+	int a = s->top(); s->pop();
+	int b = s->top(); s->pop();
+	s->push(b % a);
+}
+
+// VM Execution.
 int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int current_index, char* operation){
 	
-	if (strcmp(operation, "SP_I") == 0){
+	if (strcmp(operation, "I") == 0){
 		char* operand = bytecode[current_index + 1];
 		
 		stringstream ss;
@@ -26,17 +92,47 @@ int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int c
 		return current_index + 2;
 	}
 	
-	if (strcmp(operation, "I+") == 0){
-		int operand_a = memory_stack->top();
-		memory_stack->pop();
-		int operand_b = memory_stack->top();
-		memory_stack->pop();
-		
-		memory_stack->push(operand_b + operand_a);
-		return current_index + 1;
+	if (strcmp(operation, "+") == 0){
+		vm_op_plus(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "-") == 0){
+		vm_op_minus(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "*") == 0){
+		vm_op_mul(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "/") == 0){
+		vm_op_div(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "==") == 0){
+		vm_op_eq(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "!=") == 0){
+		vm_op_ne(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, ">") == 0){
+		vm_op_gt(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "<") == 0){
+		vm_op_lt(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, ">=") == 0){
+		vm_op_geq(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "<=") == 0){
+		vm_op_leq(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "%") == 0){
+		vm_op_mod(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "--") == 0){
+		vm_op_dec(memory_stack); return ++current_index;
+	}
+	if (strcmp(operation, "++") == 0){
+		vm_op_inc(memory_stack); return ++current_index;
 	}
 	
-	if (strcmp(operation, "I_SHOW") == 0){
+	if (strcmp(operation, "SH") == 0){
 		int operand = memory_stack->top();
 		memory_stack->pop();
 		printf("%d\n", operand);
@@ -99,6 +195,8 @@ int vm_execute_file(char* bytecode_path){
 	//fputs("------\n", stdout);
 	return 0;
 }
+
+// Entry point.
 
 int main(int argc, char* argv[]){
 	fputs("[Gofra VM] Welcome to the Gofra VM CLI!\n", stdout);
