@@ -13,6 +13,7 @@
 using namespace std;
 
 // VM Operations.
+// Math.
 void vm_op_plus(stack<int>* s){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
@@ -76,6 +77,11 @@ void vm_op_mod(stack<int>* s){
 	int b = s->top(); s->pop();
 	s->push(b % a);
 }
+// Stack.
+void vm_op_show(stack<int>* s){
+	int a = s->top(); s->pop();
+	printf("%d\n", a);
+}
 
 // VM Execution.
 int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int current_index, char* operation){
@@ -131,12 +137,8 @@ int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int c
 	if (strcmp(operation, "++") == 0){
 		vm_op_inc(memory_stack); return ++current_index;
 	}
-	
 	if (strcmp(operation, "SH") == 0){
-		int operand = memory_stack->top();
-		memory_stack->pop();
-		printf("%d\n", operand);
-		return current_index + 1;
+		vm_op_show(memory_stack); return ++current_index;
 	}
 	
 	printf("Error! Got unexpected bytecode VM operation: `%s`\n", operation);
