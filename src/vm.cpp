@@ -200,10 +200,31 @@ int vm_execute_file(char* bytecode_path){
 
 // Entry point.
 
-int main(int argc, char* argv[]){
-	fputs("[Gofra VM] Welcome to the Gofra VM CLI!\n", stdout);
-	fputs("------\n", stdout);
+// CLI flags.
+bool silent = false; // Hides messages, except from execution.
+bool verbose = false; // Shows system* messages.
 	
+void readArgs(int argc, char* argv[]){
+	for (int argi = 0; argi < argc; argi++){
+		char* arg = argv[argi];
+			
+		if (strcmp(arg, "-s") == 0){
+			silent = true;
+			continue;
+		}
+		
+		if (strcmp(arg, "-v") == 0){
+			verbose = true;
+			continue;
+		}
+	}
+}
+
+int main(int argc, char* argv[]){
+	readArgs(argc, argv);
+	
+	if (!silent) fputs("[Gofra VM] Welcome to the Gofra VM CLI!\n", stdout);
+
 	if (argc == 0){
 		fputs("[Gofra VM] Error! Invalid arguments count (Zero, 0)!\n", stderr);
 		return 1;
@@ -214,11 +235,6 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	
-	if (argc == 2){
-		return vm_execute_file(argv[1]);
-	}
-	
-	fputs("[Gofra VM] Error! Invalid arguments count!\n", stderr);
-	return 1;
+	return vm_execute_file(argv[1]);
 }
 
