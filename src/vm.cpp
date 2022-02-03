@@ -136,9 +136,9 @@ void bc_read_tokens_from_file(FILE* fp, vector<char*>* bc){
 }
 
 // Virtual machine. 
-int vm_execute_operation(stack<int>* ms, vector<char*> bc, int index, char* op){
+int vm_execute_operation(stack<int>* ms, vector<char*>* bc, int index, char* op){
 	// Base.
-	if (!strcmp(op, "I")) return vm_op_push_integer(ms, index, bc[index + 1]);
+	if (!strcmp(op, "I")) return vm_op_push_integer(ms, index, (*bc)[index + 1]);
 	if (!strcmp(op, "SH")) return vm_op_show(ms, index);
 	
 	// Math.
@@ -171,7 +171,7 @@ void vm_execute_bytecode(vector<char*>* bc){
 	int op_count = bc->size();
 	while (op_index < op_count){
 		char* op = (*bc)[op_index];
-		op_index = vm_execute_operation(ms, *bc, op_index, op);
+		op_index = vm_execute_operation(ms, bc, op_index, op);
 	}
 	
 	if (!silent) fputs("Finished executing bytecode!\n", stdout);
@@ -185,6 +185,55 @@ void vm_execute_file(const char* path){
 	fclose(fp);
    
 	vm_execute_bytecode(bytecode);
+}
+
+// Assembly compiler.
+FILE* asm_open_file(const char* path){
+	#define EXTENSION ".asm"
+	if (!silent && verbose) fputs("Opening assembly file...\n", stdout);
+	
+	char* asm_extension = EXTENSION;
+	char* asm_path = (char*)malloc(strlen(path) + strlen(EXTENSION) + 1);
+	
+	int p, q = 0;
+  	for (p = 0; (asm_path[q] = path[p]) != '\0'; ++p, ++q) {}
+  	for (p = 0; (asm_path[q] = asm_extension[p]) != '\0'; ++p, ++q) {}
+	
+	FILE* fp = fopen(asm_path, "w");
+	if (fp == NULL){
+		fputs("ERROR! Failed to open assembly file for writing!\n", stderr);
+		exit(1);
+	}
+	
+	return fp;
+}
+void asm_compile_operation(FILE* fp, char* op){
+	fputs(op, fp);
+}
+void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
+	if (!silent) fputs("Compiling bytecode...\n", stdout);
+	
+	int op_index = 0;
+	int op_count = bc->size();
+	while (op_index < op_count){
+		char* op = (*bc)[op_index];
+		asm_compile_operation(fp, op);
+		op_index++;
+	}
+	
+	if (!silent) fputs("Finished compiling bytecode!\n", stdout);
+}
+void asm_compile_file(const char* path){
+	FILE* fp = bc_open_file(path);
+	
+	vector<char*>* bytecode = new vector<char*>;
+	
+	bc_read_tokens_from_file(fp, bytecode);
+	fclose(fp);
+   
+   	fp = asm_open_file(path);
+	asm_compile_bytecode(fp, bytecode);
+	fclose(fp);
 }
 
 // CLI.
@@ -227,6 +276,7 @@ int main(int argc, char* argv[]){
 	
 	read_args(argc, argv);
 	vm_execute_file(argv[1]);
+	asm_compile_file(argv[1]);
 	
 	return 0;
 }
