@@ -7,7 +7,6 @@
 // WARN. WORK IN PROGRESS.
 // THIS IS TEST CODE.
 
-#define VM_BYTECODE_READ_BUFFER_SIZE 256
 #define VM_BYTECODE_BUFFER_SIZE 2048
 #define VM_BYTECODE_TOKEN_BUFFER_SIZE 64
 
@@ -165,8 +164,10 @@ void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	if (!silent) fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
 }
 
-
+// Bytecode.
 FILE* bc_open_file(const char* path){
+	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
+	
 	FILE* fp = fopen(path, "r");
 	if (fp == NULL){
 		if (errno == ENOENT){
@@ -179,36 +180,42 @@ FILE* bc_open_file(const char* path){
 	
 	return fp;
 }
-
-void vm_execute_file(const char* bytecode_path){
-	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
-	
-	FILE* bytecode_fp = bc_open_file(bytecode_path);
-	
-	vector<char*> bytecode;
-	char* token = NULL;
-	char line_buffer[VM_BYTECODE_READ_BUFFER_SIZE];
-	
-	if (!silent && verbose) fputs("[Gofra VM] Reading bytecode file...\n", stdout);
-    while (!feof(bytecode_fp)){
-    	if (fgets(line_buffer, VM_BYTECODE_READ_BUFFER_SIZE, bytecode_fp) == NULL){
-			break;
-		}
-		
-		token = strtok(line_buffer, " \n");
-	    while (token != NULL){
-	    	char* bytecode_operator = (char*)malloc(strlen(token) + 1);
-	    	strcpy(bytecode_operator, token);
-	    	
-	    	bytecode.push_back(bytecode_operator);
-	        token = strtok(NULL, " \n");
-	    }
+void bc_read_tokens_from_string(char* string, vector<char*>* bc){
+	#define SEPARATORS " \n"
+	char* token = strtok(string, SEPARATORS);
+    while(token != NULL){
+    	char* op = (char*)malloc(strlen(token) + 1);
+    	strcpy(op, token);
+    	
+    	bc->push_back(op);
+    	
+        token = strtok(NULL, SEPARATORS);
     }
-    
-    if (!silent && verbose) fputs("[Gofra VM] Successfully readed bytecode file!\n", stdout);
-	fclose(bytecode_fp);
+}
+void bc_read_tokens_from_file(FILE* fp, vector<char*>* bc){
+	if (!silent && verbose) fputs("Reading bytecode file...\n", stdout);
 	
-	vm_execute_bytecode(&bytecode);
+	#define BUFFER_SIZE 256
+	char buffer[BUFFER_SIZE];
+	
+    while (!feof(fp)){
+    	if (fgets(buffer, BUFFER_SIZE, fp) == NULL) break;
+		bc_read_tokens_from_string((char*)&buffer, bc);
+    } 
+    
+    if (!silent && verbose) fputs("Finished reading bytecode file!\n", stdout);
+}
+
+// Virtual machine. 
+void vm_execute_file(const char* path){
+	FILE* fp = bc_open_file(path);
+	
+	vector<char*>* bytecode = new vector<char*>;
+	
+	bc_read_tokens_from_file(fp, bytecode);
+	fclose(fp);
+   
+	vm_execute_bytecode(bytecode);
 }
 
 // CLI.
