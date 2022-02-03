@@ -164,18 +164,19 @@ void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	if (!silent) fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
 }
 
-int vm_execute_file(char* bytecode_path){
-	if (!silent && verbose) fputs("[Gofra VM] Opening bytecode file...\n", stdout);
+void vm_execute_file(const char* bytecode_path){
+	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
 	
 	FILE* bytecode_fp = fopen(bytecode_path, "r");
 	if (bytecode_fp == NULL){
-		printf("[Gofra VM] Error! Failed to open bytecode file!\n");
-		return 1;
+		fputs("Failed to open bytecode file!\n", stderr);
+		exit(1);
 	}
 	
 	vector<char*> bytecode;
 	char* token = NULL;
 	char line_buffer[VM_BYTECODE_READ_BUFFER_SIZE];
+	
 	if (!silent && verbose) fputs("[Gofra VM] Reading bytecode file...\n", stdout);
     while (!feof(bytecode_fp)){
     	if (fgets(line_buffer, VM_BYTECODE_READ_BUFFER_SIZE, bytecode_fp) == NULL){
@@ -183,8 +184,7 @@ int vm_execute_file(char* bytecode_path){
 		}
 		
 		token = strtok(line_buffer, " \n");
-	    while (token != NULL)
-	    {
+	    while (token != NULL){
 	    	char* bytecode_operator = (char*)malloc(strlen(token) + 1);
 	    	strcpy(bytecode_operator, token);
 	    	
@@ -197,10 +197,9 @@ int vm_execute_file(char* bytecode_path){
 	fclose(bytecode_fp);
 	
 	vm_execute_bytecode(&bytecode);
-	return 0;
 }
 
-void readArgs(int argc, char* argv[]){
+void read_args(int argc, char* argv[]){
 	for (int argi = 0; argi < argc; argi++){
 		char* arg = argv[argi];
 			
@@ -213,7 +212,12 @@ void readArgs(int argc, char* argv[]){
 	}
 }
 
-void usage(const char* program){
+void usage(int argc, char* argv[]){
+	const char* program;
+	if (argc > 0){
+		program = argv[0];
+	}else exit(1);
+
 	fputs("Execute Gofra language bytecode from the CLI.\n\n", stdout);
 	fputs("USAGE: \n", stdout);
 	
@@ -226,13 +230,15 @@ void usage(const char* program){
 	fputs("\t[-s] Silent flag, will supress all messages except execution.\n", stdout);
 }
 
-
 int main(int argc, char* argv[]){
-	readArgs(argc, argv);
 	if (argc <= 1){
-		usage(argc > 0 ? argv[0] : "exec");
-		return 1;
+		usage(argc, argv);
+		exit(1);
 	}
-	return vm_execute_file(argv[1]);
+	
+	read_args(argc, argv);
+	vm_execute_file(argv[1]);
+	
+	return 0;
 }
 
