@@ -1,167 +1,96 @@
+// Gofra programming language bytecode bytecode.
+// https://gofra-lang.github.io/
+// https://github.com/gofra-lang/vm
+// (c) 2022 Kirill Zhosul.
+
+// WARNING:
+// This code is more like test code!
+
 #include <bits/stdc++.h> 
-#include <bits/stl_bvector.h>
-#include <stack>
-#include <sstream>
-#include <errno.h>
-
-// WARN. WORK IN PROGRESS.
-// THIS IS TEST CODE.
-
-#define VM_BYTECODE_BUFFER_SIZE 2048
-#define VM_BYTECODE_TOKEN_BUFFER_SIZE 64
 
 // CLI flags.
-bool silent = false; // Hides messages, except from execution.
-bool verbose = false; // Shows system* messages.
+bool silent = false;
+bool verbose = false;
 	
 using namespace std;
 
-// VM Operations.
-// Math.
-void vm_op_plus(stack<int>* s){
+// Operations.
+int vm_op_plus(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b + a);
+	s->push(b + a);return ++i;
 }
-void vm_op_minus(stack<int>* s){
+int vm_op_minus(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b - a);
+	s->push(b - a); return ++i;
 }
-void vm_op_dec(stack<int>* s){
+int vm_op_dec(stack<int>* s, int i){
 	int a = s->top(); s->pop();
-	s->push(--a);
+	s->push(--a); return ++i;
 }
-void vm_op_inc(stack<int>* s){
+int vm_op_inc(stack<int>* s, int i){
 	int a = s->top(); s->pop();
-	s->push(++a);
+	s->push(++a); return ++i;
 }
-void vm_op_div(stack<int>* s){
-	int a = s->top(); s->pop();
-	int b = s->top(); s->pop();
-	s->push(b / a);
-}
-void vm_op_mul(stack<int>* s){
+int vm_op_div(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b * a);
+	s->push(b / a); return ++i;
 }
-void vm_op_eq(stack<int>* s){
+int vm_op_mul(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b == a);
+	s->push(b * a); return ++i;
 }
-void vm_op_ne(stack<int>* s){
+int vm_op_eq(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b != a);
+	s->push(b == a); return ++i;
 }
-void vm_op_gt(stack<int>* s){
+int vm_op_ne(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b > a);
+	s->push(b != a); return ++i;
 }
-void vm_op_lt(stack<int>* s){
+int vm_op_gt(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b < a);
+	s->push(b > a); return ++i;
 }
-void vm_op_geq(stack<int>* s){
+int vm_op_lt(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b >= a);
+	s->push(b < a); return ++i;
 }
-void vm_op_leq(stack<int>* s){
+int vm_op_geq(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b <= a);
+	s->push(b >= a); return ++i;
 }
-void vm_op_mod(stack<int>* s){
+int vm_op_leq(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
-	s->push(b % a);
+	s->push(b <= a); return ++i;
 }
-// Stack.
-void vm_op_show(stack<int>* s){
+int vm_op_mod(stack<int>* s, int i){
 	int a = s->top(); s->pop();
-	printf("%d\n", a);
+	int b = s->top(); s->pop();
+	s->push(b % a); return ++i;
 }
-
-// VM Execution.
-int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int current_index, char* operation){
+int vm_op_show(stack<int>* s, int i){
+	printf("%d\n", s->top()); s->pop();
+	return ++i;
+}
+int vm_op_push_integer(stack<int>* s, int i, char* o){
+	int integer;
 	
-	if (strcmp(operation, "I") == 0){
-		char* operand = bytecode[current_index + 1];
-		
-		stringstream ss;
-		int num;
-		ss << operand;
-		ss >> num;
-		
-		memory_stack->push(num);
-		return current_index + 2;
-	}
+	stringstream ss;
+	ss << o;
+	ss >> integer;
 	
-	if (strcmp(operation, "+") == 0){
-		vm_op_plus(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "-") == 0){
-		vm_op_minus(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "*") == 0){
-		vm_op_mul(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "/") == 0){
-		vm_op_div(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "==") == 0){
-		vm_op_eq(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "!=") == 0){
-		vm_op_ne(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, ">") == 0){
-		vm_op_gt(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "<") == 0){
-		vm_op_lt(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, ">=") == 0){
-		vm_op_geq(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "<=") == 0){
-		vm_op_leq(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "%") == 0){
-		vm_op_mod(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "--") == 0){
-		vm_op_dec(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "++") == 0){
-		vm_op_inc(memory_stack); return ++current_index;
-	}
-	if (strcmp(operation, "SH") == 0){
-		vm_op_show(memory_stack); return ++current_index;
-	}
-	
-	printf("Error! Got unexpected bytecode VM operation: `%s`\n", operation);
-	return ++current_index;
-}
-
-void vm_execute_bytecode(vector<char*>* bytecode_ptr){
-	if (!silent) fputs("[Gofra VM] Executing bytecode...\n", stdout);
-	int current_operation_index = 0;
-	int size = bytecode_ptr->size();
-	
-	
-	if (!silent && verbose) printf("[Gofra VM] Bytecode has %d operators!\n", size);
-	stack<int> memory_stack;
-	vector<char*> bytecode = *bytecode_ptr;
-	while (current_operation_index < size){
-		current_operation_index = vm_execute_operation(&memory_stack, bytecode, current_operation_index, bytecode[current_operation_index]);
-	}
-	if (!silent) fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
+	s->push(integer);
+	return i + 2;
 }
 
 // Bytecode.
@@ -207,6 +136,46 @@ void bc_read_tokens_from_file(FILE* fp, vector<char*>* bc){
 }
 
 // Virtual machine. 
+int vm_execute_operation(stack<int>* ms, vector<char*> bc, int index, char* op){
+	// Base.
+	if (!strcmp(op, "I")) return vm_op_push_integer(ms, index, bc[index + 1]);
+	if (!strcmp(op, "SH")) return vm_op_show(ms, index);
+	
+	// Math.
+	if (!strcmp(op, "+")) return vm_op_plus(ms, index);
+	if (!strcmp(op, "-")) return vm_op_minus(ms, index);
+	if (!strcmp(op, "*")) return vm_op_mul(ms, index);
+	if (!strcmp(op, "/")) return vm_op_div(ms, index);
+	if (!strcmp(op, ">")) return vm_op_gt(ms, index);
+	if (!strcmp(op, "<")) return vm_op_lt(ms, index);
+	if (!strcmp(op, "%")) return vm_op_mod(ms, index);
+	if (!strcmp(op, "==")) return vm_op_eq(ms, index);
+	if (!strcmp(op, "!=")) return vm_op_ne(ms, index);
+	if (!strcmp(op, ">=")) return vm_op_geq(ms, index);
+	if (!strcmp(op, "<=")) return vm_op_leq(ms, index);
+	if (!strcmp(op, "--")) return vm_op_dec(ms, index);
+	if (!strcmp(op, "++")) return vm_op_inc(ms, index);
+	
+	fputs("ERROR! Got unexpected operation `", stderr);
+	fputs(op, stderr);
+	fputs("`!\n", stderr);
+	
+	exit(2);
+}
+void vm_execute_bytecode(vector<char*>* bc){
+	if (!silent) fputs("Executing bytecode...\n", stdout);
+	
+	stack<int>* ms = new stack<int>;
+	
+	int op_index = 0;
+	int op_count = bc->size();
+	while (op_index < op_count){
+		char* op = (*bc)[op_index];
+		op_index = vm_execute_operation(ms, *bc, op_index, op);
+	}
+	
+	if (!silent) fputs("Finished executing bytecode!\n", stdout);
+}
 void vm_execute_file(const char* path){
 	FILE* fp = bc_open_file(path);
 	
