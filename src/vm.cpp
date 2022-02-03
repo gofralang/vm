@@ -208,7 +208,8 @@ FILE* asm_open_file(const char* path){
 	return fp;
 }
 void asm_compile_operation(FILE* fp, char* op){
-	fputs(op, fp);
+	fputs("ERROR! Assembly compilation is not completed yet!\n", stderr);
+	exit(1);
 }
 void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
 	if (!silent) fputs("Compiling bytecode...\n", stdout);
