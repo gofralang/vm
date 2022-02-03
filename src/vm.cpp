@@ -10,6 +10,10 @@
 #define VM_BYTECODE_BUFFER_SIZE 2048
 #define VM_BYTECODE_TOKEN_BUFFER_SIZE 64
 
+// CLI flags.
+bool silent = false; // Hides messages, except from execution.
+bool verbose = false; // Shows system* messages.
+	
 using namespace std;
 
 // VM Operations.
@@ -146,22 +150,22 @@ int vm_execute_operation(stack<int>* memory_stack, vector<char*> bytecode, int c
 }
 
 void vm_execute_bytecode(vector<char*>* bytecode_ptr){
-	fputs("[Gofra VM] Executing bytecode...\n", stdout);
+	if (!silent) fputs("[Gofra VM] Executing bytecode...\n", stdout);
 	int current_operation_index = 0;
 	int size = bytecode_ptr->size();
 	
 	
-	printf("[Gofra VM] Bytecode has %d operators!\n", size);
+	if (!silent) printf("[Gofra VM] Bytecode has %d operators!\n", size);
 	stack<int> memory_stack;
 	vector<char*> bytecode = *bytecode_ptr;
 	while (current_operation_index < size){
 		current_operation_index = vm_execute_operation(&memory_stack, bytecode, current_operation_index, bytecode[current_operation_index]);
 	}
-	fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
+	if (!silent) fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
 }
 
 int vm_execute_file(char* bytecode_path){
-	fputs("[Gofra VM] Opening bytecode file...\n", stdout);
+	if (!silent) fputs("[Gofra VM] Opening bytecode file...\n", stdout);
 	
 	FILE* bytecode_fp = fopen(bytecode_path, "r");
 	if (bytecode_fp == NULL){
@@ -172,7 +176,7 @@ int vm_execute_file(char* bytecode_path){
 	vector<char*> bytecode;
 	char* token = NULL;
 	char line_buffer[VM_BYTECODE_READ_BUFFER_SIZE];
-	fputs("[Gofra VM] Reading bytecode file...\n", stdout);
+	if (!silent) fputs("[Gofra VM] Reading bytecode file...\n", stdout);
     while (!feof(bytecode_fp)){
     	if (fgets(line_buffer, VM_BYTECODE_READ_BUFFER_SIZE, bytecode_fp) == NULL){
 			break;
@@ -189,21 +193,15 @@ int vm_execute_file(char* bytecode_path){
 	    }
     }
     
-    fputs("[Gofra VM] Successfully readed bytecode file!\n", stdout);
-    fputs("------\n", stdout);
+    if (!silent) fputs("[Gofra VM] Successfully readed bytecode file!\n", stdout);
 	fclose(bytecode_fp);
 	
 	vm_execute_bytecode(&bytecode);
-	//fputs("------\n", stdout);
 	return 0;
 }
 
 // Entry point.
 
-// CLI flags.
-bool silent = false; // Hides messages, except from execution.
-bool verbose = false; // Shows system* messages.
-	
 void readArgs(int argc, char* argv[]){
 	for (int argi = 0; argi < argc; argi++){
 		char* arg = argv[argi];
