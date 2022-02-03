@@ -200,39 +200,39 @@ int vm_execute_file(char* bytecode_path){
 	return 0;
 }
 
-// Entry point.
-
 void readArgs(int argc, char* argv[]){
 	for (int argi = 0; argi < argc; argi++){
 		char* arg = argv[argi];
 			
 		if (strcmp(arg, "-s") == 0){
-			silent = true;
-			continue;
+			silent = true; continue;
 		}
-		
 		if (strcmp(arg, "-v") == 0){
-			verbose = true;
-			continue;
+			verbose = true; continue;
 		}
 	}
 }
 
+void usage(const char* program){
+	fputs("Execute Gofra language bytecode from the CLI.\n\n", stdout);
+	fputs("USAGE: \n", stdout);
+	
+	// "program path [-v] [-v]"
+	fputs("\t", stdout); fputs(program, stdout); fputs(" <path> [-v] [-s]\n", stdout);
+	fputs("\t  path - Path to the `.gofbc` file with the bytecode.\n\n", stdout);
+	
+	fputs("FLAGS:\n", stdout);
+	fputs("\t[-v] Verbose flag, will show more debug messages,\n", stdout);
+	fputs("\t[-s] Silent flag, will supress all messages except execution.\n", stdout);
+}
+
+
 int main(int argc, char* argv[]){
 	readArgs(argc, argv);
-	
-	if (!silent) fputs("[Gofra VM] Welcome to the Gofra VM CLI!\n", stdout);
-
-	if (argc == 0){
-		fputs("[Gofra VM] Error! Invalid arguments count (Zero, 0)!\n", stderr);
+	if (argc <= 1){
+		usage(argc > 0 ? argv[0] : "exec");
 		return 1;
 	}
-	
-	if (argc == 1){
-		fputs("[Gofra VM] Error! No bytecode file providen!\n", stderr);
-		return 1;
-	}
-	
 	return vm_execute_file(argv[1]);
 }
 
