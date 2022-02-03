@@ -2,6 +2,7 @@
 #include <bits/stl_bvector.h>
 #include <stack>
 #include <sstream>
+#include <errno.h>
 
 // WARN. WORK IN PROGRESS.
 // THIS IS TEST CODE.
@@ -164,14 +165,25 @@ void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	if (!silent) fputs("[Gofra VM] Successfully executed bytecode!\n", stdout);
 }
 
+
+FILE* bc_open_file(const char* path){
+	FILE* fp = fopen(path, "r");
+	if (fp == NULL){
+		if (errno == ENOENT){
+			fputs("ERROR! Failed to open bytecode file for reading because file not exists!\n", stderr);
+			exit(1);
+		}
+		fputs("ERROR! Failed to open bytecode file for reading!\n", stderr);
+		exit(1);
+	}
+	
+	return fp;
+}
+
 void vm_execute_file(const char* bytecode_path){
 	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
 	
-	FILE* bytecode_fp = fopen(bytecode_path, "r");
-	if (bytecode_fp == NULL){
-		fputs("Failed to open bytecode file!\n", stderr);
-		exit(1);
-	}
+	FILE* bytecode_fp = bc_open_file(bytecode_path);
 	
 	vector<char*> bytecode;
 	char* token = NULL;
@@ -199,6 +211,7 @@ void vm_execute_file(const char* bytecode_path){
 	vm_execute_bytecode(&bytecode);
 }
 
+// CLI.
 void read_args(int argc, char* argv[]){
 	for (int argi = 0; argi < argc; argi++){
 		char* arg = argv[argi];
@@ -211,12 +224,11 @@ void read_args(int argc, char* argv[]){
 		}
 	}
 }
-
 void usage(int argc, char* argv[]){
 	const char* program;
 	if (argc > 0){
 		program = argv[0];
-	}else exit(1);
+	}else exit(127);
 
 	fputs("Execute Gofra language bytecode from the CLI.\n\n", stdout);
 	fputs("USAGE: \n", stdout);
@@ -230,10 +242,11 @@ void usage(int argc, char* argv[]){
 	fputs("\t[-s] Silent flag, will supress all messages except execution.\n", stdout);
 }
 
+// Entry point.
 int main(int argc, char* argv[]){
 	if (argc <= 1){
 		usage(argc, argv);
-		exit(1);
+		exit(127);
 	}
 	
 	read_args(argc, argv);
