@@ -155,7 +155,7 @@ void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 	int size = bytecode_ptr->size();
 	
 	
-	if (!silent) printf("[Gofra VM] Bytecode has %d operators!\n", size);
+	if (!silent && verbose) printf("[Gofra VM] Bytecode has %d operators!\n", size);
 	stack<int> memory_stack;
 	vector<char*> bytecode = *bytecode_ptr;
 	while (current_operation_index < size){
@@ -165,7 +165,7 @@ void vm_execute_bytecode(vector<char*>* bytecode_ptr){
 }
 
 int vm_execute_file(char* bytecode_path){
-	if (!silent) fputs("[Gofra VM] Opening bytecode file...\n", stdout);
+	if (!silent && verbose) fputs("[Gofra VM] Opening bytecode file...\n", stdout);
 	
 	FILE* bytecode_fp = fopen(bytecode_path, "r");
 	if (bytecode_fp == NULL){
@@ -176,7 +176,7 @@ int vm_execute_file(char* bytecode_path){
 	vector<char*> bytecode;
 	char* token = NULL;
 	char line_buffer[VM_BYTECODE_READ_BUFFER_SIZE];
-	if (!silent) fputs("[Gofra VM] Reading bytecode file...\n", stdout);
+	if (!silent && verbose) fputs("[Gofra VM] Reading bytecode file...\n", stdout);
     while (!feof(bytecode_fp)){
     	if (fgets(line_buffer, VM_BYTECODE_READ_BUFFER_SIZE, bytecode_fp) == NULL){
 			break;
@@ -193,7 +193,7 @@ int vm_execute_file(char* bytecode_path){
 	    }
     }
     
-    if (!silent) fputs("[Gofra VM] Successfully readed bytecode file!\n", stdout);
+    if (!silent && verbose) fputs("[Gofra VM] Successfully readed bytecode file!\n", stdout);
 	fclose(bytecode_fp);
 	
 	vm_execute_bytecode(&bytecode);
