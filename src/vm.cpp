@@ -96,7 +96,7 @@ int vm_op_push_integer(stack<int>* s, int i, char* o){
 // Assembly operations.
 int asm_op_push_integer(FILE* fp, int i, char* o){
 	fputs(";; PUSH INTEGER\n", fp);
-	fputs("mov rax ", fp);
+	fputs("mov rax, ", fp);
 	fputs(o, fp);
 	fputs("\n", fp);
 	fputs("push rax\n", fp);
@@ -229,7 +229,7 @@ void vm_execute_file(const char* path){
 
 // Assembly compiler.
 FILE* asm_open_file(const char* path){
-	#define EXTENSION ".asm"
+	#define EXTENSION (char*)".asm"
 	if (!silent && verbose) fputs("Opening assembly file...\n", stdout);
 	
 	char* asm_extension = EXTENSION;
@@ -248,8 +248,6 @@ FILE* asm_open_file(const char* path){
 	return fp;
 }
 int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
-	// TODO: ASM HEADER.
-	
 	// Base.
 	if (!strcmp(op, "I")) return asm_op_push_integer(fp, index, (*bc)[index + 1]);
 	if (!strcmp(op, "SH")) return asm_op_not_implemented_yet(fp, index);
@@ -278,6 +276,7 @@ int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
 }
 void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
 	if (!silent) fputs("Compiling bytecode...\n", stdout);
+	fputs("BITS 64\n", fp);
 	
 	int op_index = 0;
 	int op_count = bc->size();
