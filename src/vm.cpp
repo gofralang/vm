@@ -228,6 +228,14 @@ void vm_execute_file(const char* path){
 }
 
 // Assembly compiler.
+void asm_write_header(FILE* fp){
+	fputs("; NASM assembly. Compiled from Gofra bytecode via Gofra virtual machine!", fp);
+	fputs("BITS 64\n", fp);
+	fputs("section .text\n", fp);
+	fputs("global _start\n", fp);
+	fputs("_start:\n", fp);
+}
+
 FILE* asm_open_file(const char* path){
 	#define EXTENSION (char*)".asm"
 	if (!silent && verbose) fputs("Opening assembly file...\n", stdout);
@@ -247,7 +255,8 @@ FILE* asm_open_file(const char* path){
 	
 	return fp;
 }
-int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
+int asm_compile_operation(FILE* fp, 
+vector<char*>* bc, int index, char* op){
 	// Base.
 	if (!strcmp(op, "I")) return asm_op_push_integer(fp, index, (*bc)[index + 1]);
 	if (!strcmp(op, "SH")) return asm_op_not_implemented_yet(fp, index);
@@ -276,8 +285,7 @@ int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
 }
 void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
 	if (!silent) fputs("Compiling bytecode...\n", stdout);
-	fputs("BITS 64\n", fp);
-	
+
 	int op_index = 0;
 	int op_count = bc->size();
 	while (op_index < op_count){
@@ -296,6 +304,7 @@ void asm_compile_file(const char* path){
 	fclose(fp);
    
    	fp = asm_open_file(path);
+   	asm_write_header(fp);
 	asm_compile_bytecode(fp, bytecode);
 	fclose(fp);
 }
