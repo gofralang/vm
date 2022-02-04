@@ -1,4 +1,4 @@
-// Gofra programming language bytecode bytecode.
+// Gofra programming language bytecode interpreteter (Virtual Machine).
 // https://gofra-lang.github.io/
 // https://github.com/gofra-lang/vm
 // (c) 2022 Kirill Zhosul.
@@ -102,15 +102,37 @@ int asm_op_push_integer(FILE* fp, int i, char* o){
 	fputs("push rax\n", fp);
 	return i + 2;
 }
-
-int asm_op_not_implemented_yet(FILE* fp, int i){
-	fputs("ERROR! Got operation that is not implemented yet for assembly compilation!\n", stderr);
-	
-	//fclose(fp);
-	//exit(2);
-	
+int asm_op_plus(FILE* fp, int i){
+	fputs(";; PLUS\n", fp);
+	fputs("pop rax\n", fp);
+	fputs("pop rbx\n", fp);
+	fputs("add rax, rbx\n", fp);
+	fputs("push rax\n", fp);
 	return ++i;
 }
+int asm_op_minus(FILE* fp, int i){
+	fputs(";; MINUS\n", fp);
+	fputs("pop rax\n", fp);
+	fputs("pop rbx\n", fp);
+	fputs("sub rax, rbx\n", fp);
+	fputs("push rax\n", fp);
+	return ++i;
+}
+int asm_op_mul(FILE* fp, int i){
+	fputs(";; MULTIPLY\n", fp);
+	fputs("pop rax\n", fp);
+	fputs("pop rbx\n", fp);
+	fputs("mul rbx\n", fp);
+	fputs("push rax\n", fp);
+	return ++i;
+}
+int asm_op_not_implemented_yet(FILE* fp, int i){
+	fputs("ERROR! Got operation that is not implemented yet for assembly compilation!\n", stderr);
+	//fclose(fp);
+	//exit(2);
+	return ++i;
+}
+
 // Bytecode.
 FILE* bc_open_file(const char* path){
 	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
@@ -233,9 +255,9 @@ int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
 	if (!strcmp(op, "SH")) return asm_op_not_implemented_yet(fp, index);
 	
 	// Math.
-	if (!strcmp(op, "+")) return asm_op_not_implemented_yet(fp, index);
-	if (!strcmp(op, "-")) return asm_op_not_implemented_yet(fp, index);
-	if (!strcmp(op, "*")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "+")) return asm_op_plus(fp, index);
+	if (!strcmp(op, "-")) return asm_op_minus(fp, index);
+	if (!strcmp(op, "*")) return asm_op_mul(fp, index);
 	if (!strcmp(op, "/")) return asm_op_not_implemented_yet(fp, index);
 	if (!strcmp(op, ">")) return asm_op_not_implemented_yet(fp, index);
 	if (!strcmp(op, "<")) return asm_op_not_implemented_yet(fp, index);
