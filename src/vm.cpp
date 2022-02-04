@@ -14,7 +14,7 @@ bool verbose = false;
 	
 using namespace std;
 
-// Operations.
+// VM Operations.
 int vm_op_plus(stack<int>* s, int i){
 	int a = s->top(); s->pop();
 	int b = s->top(); s->pop();
@@ -93,6 +93,24 @@ int vm_op_push_integer(stack<int>* s, int i, char* o){
 	return i + 2;
 }
 
+// Assembly operations.
+int asm_op_push_integer(FILE* fp, int i, char* o){
+	fputs(";; PUSH INTEGER\n", fp);
+	fputs("mov rax ", fp);
+	fputs(o, fp);
+	fputs("\n", fp);
+	fputs("push rax\n", fp);
+	return i + 2;
+}
+
+int asm_op_not_implemented_yet(FILE* fp, int i){
+	fputs("ERROR! Got operation that is not implemented yet for assembly compilation!\n", stderr);
+	
+	//fclose(fp);
+	//exit(2);
+	
+	return ++i;
+}
 // Bytecode.
 FILE* bc_open_file(const char* path){
 	if (!silent && verbose) fputs("Opening bytecode file...\n", stdout);
@@ -207,9 +225,34 @@ FILE* asm_open_file(const char* path){
 	
 	return fp;
 }
-void asm_compile_operation(FILE* fp, char* op){
-	fputs("ERROR! Assembly compilation is not completed yet!\n", stderr);
-	exit(1);
+int asm_compile_operation(FILE* fp, vector<char*>* bc, int index, char* op){
+	// TODO: ASM HEADER.
+	
+	// Base.
+	if (!strcmp(op, "I")) return asm_op_push_integer(fp, index, (*bc)[index + 1]);
+	if (!strcmp(op, "SH")) return asm_op_not_implemented_yet(fp, index);
+	
+	// Math.
+	if (!strcmp(op, "+")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "-")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "*")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "/")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, ">")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "<")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "%")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "==")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "!=")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, ">=")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "<=")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "--")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "++")) return asm_op_not_implemented_yet(fp, index);
+	
+	fputs("ERROR! Got unexpected operation `", stderr);
+	fputs(op, stderr);
+	fputs("`!\n", stderr);
+	
+	fclose(fp);
+	exit(2);
 }
 void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
 	if (!silent) fputs("Compiling bytecode...\n", stdout);
@@ -218,8 +261,7 @@ void asm_compile_bytecode(FILE* fp, vector<char*>* bc){
 	int op_count = bc->size();
 	while (op_index < op_count){
 		char* op = (*bc)[op_index];
-		asm_compile_operation(fp, op);
-		op_index++;
+		op_index = asm_compile_operation(fp, bc, op_index, op);
 	}
 	
 	if (!silent) fputs("Finished compiling bytecode!\n", stdout);
