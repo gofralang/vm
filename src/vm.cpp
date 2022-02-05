@@ -126,6 +126,12 @@ int asm_op_mul(FILE* fp, int i){
 	fputs("push rax\n", fp);
 	return ++i;
 }
+int asm_op_show(FILE* fp, int i){
+	fputs(";; SHOW\n", fp);
+	fputs("pop rdi\n", fp);
+	fputs("call show\n", fp);
+	return ++i;
+}
 int asm_op_not_implemented_yet(FILE* fp, int i){
 	fputs("ERROR! Got operation that is not implemented yet for assembly compilation!\n", stderr);
 	//fclose(fp);
@@ -229,9 +235,14 @@ void vm_execute_file(const char* path){
 
 // Assembly compiler.
 void asm_write_header(FILE* fp){
-	fputs("; NASM assembly. Compiled from Gofra bytecode via Gofra virtual machine!", fp);
+	fputs("; NASM assembly. Compiled from Gofra bytecode via Gofra virtual machine!\n", fp);
 	fputs("BITS 64\n", fp);
-	fputs("section .text\n", fp);
+	fputs("segment .text\n", fp);
+	fputs("show:\n", fp);
+	fputs("\tmov r9, -3689348814741910323\n", fp);
+	fputs("\tsub rsp, 40\n", fp);
+	fputs("\tmov BYTE [rsp+31], 10\n", fp);
+	fputs("\tlea rcx, [rsp+30]\n", fp);
 	fputs("global _start\n", fp);
 	fputs("_start:\n", fp);
 }
@@ -259,7 +270,7 @@ int asm_compile_operation(FILE* fp,
 vector<char*>* bc, int index, char* op){
 	// Base.
 	if (!strcmp(op, "I")) return asm_op_push_integer(fp, index, (*bc)[index + 1]);
-	if (!strcmp(op, "SH")) return asm_op_not_implemented_yet(fp, index);
+	if (!strcmp(op, "SH")) return asm_op_show(fp, index);
 	
 	// Math.
 	if (!strcmp(op, "+")) return asm_op_plus(fp, index);
