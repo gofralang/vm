@@ -11,7 +11,9 @@
 // CLI flags.
 bool silent = false;
 bool verbose = false;
-	
+bool compile = false;
+bool execute = false;
+
 using namespace std;
 
 // VM Operations.
@@ -321,18 +323,6 @@ void asm_compile_file(const char* path){
 }
 
 // CLI.
-void read_args(int argc, char* argv[]){
-	for (int argi = 0; argi < argc; argi++){
-		char* arg = argv[argi];
-			
-		if (strcmp(arg, "-s") == 0){
-			silent = true; continue;
-		}
-		if (strcmp(arg, "-v") == 0){
-			verbose = true; continue;
-		}
-	}
-}
 void usage(int argc, char* argv[]){
 	const char* program;
 	if (argc > 0){
@@ -343,12 +333,36 @@ void usage(int argc, char* argv[]){
 	fputs("USAGE: \n", stdout);
 	
 	// "program path [-v] [-v]"
-	fputs("\t", stdout); fputs(program, stdout); fputs(" <path> [-v] [-s]\n", stdout);
+	fputs("\t", stdout); fputs(program, stdout); fputs(" <path> [-v] [-s] [-r] [-c]\n", stdout);
 	fputs("\t  path - Path to the `.gofbc` file with the bytecode.\n\n", stdout);
 	
 	fputs("FLAGS:\n", stdout);
+	fputs("\t[-h] This message,\n", stdout);
 	fputs("\t[-v] Verbose flag, will show more debug messages,\n", stdout);
 	fputs("\t[-s] Silent flag, will supress all messages except execution.\n", stdout);
+	fputs("\t[-r] Run flag, will execute with VM bytecode interpreteter.\n", stdout);
+	fputs("\t[-c] Compile flag, will compile bytecode to Assembly instructions (NASM x86_64).\n", stdout);
+}
+void read_args(int argc, char* argv[]){
+	for (int argi = 0; argi < argc; argi++){
+		char* arg = argv[argi];
+			
+		if (strcmp(arg, "-s") == 0){
+			silent = true; continue;
+		}
+		if (strcmp(arg, "-v") == 0){
+			verbose = true; continue;
+		}
+		if (strcmp(arg, "-c") == 0){
+			compile = true; continue;
+		}
+		if (strcmp(arg, "-r") == 0){
+			execute = true; continue;
+		}
+		if (strcmp(arg, "-h") == 0){
+			usage(argc, argv); continue;
+		}
+	}
 }
 
 // Entry point.
@@ -359,8 +373,13 @@ int main(int argc, char* argv[]){
 	}
 	
 	read_args(argc, argv);
-	vm_execute_file(argv[1]);
-	asm_compile_file(argv[1]);
+	if (execute) vm_execute_file(argv[1]);
+	if (compile) asm_compile_file(argv[1]);
+	if (!execute && !compile){
+		fputs("WARNING! None of `-r` or `-c` flag is passed!\nPlease write: \n", stdout);	
+		fputs(argv[0], stdout);	
+		fputs(" -h", stdout);	
+	}
 	
 	return 0;
 }
