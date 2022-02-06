@@ -1,5 +1,14 @@
 # Gofra virtual machine.
-###### There is internal interpretator in Gofra core.
-##### VM allows you run (inerpretate) bytecode compiled via Gofra-Lang core. Gorfa bytecode files have extension `.gofbc`. 
+There is internal interpretator in Gofra-Lang core, bytecode for now not have some major thigs.
+*****
 
-This project is currenlty under development, use core, this is only experimental stuff.
+## Features
+- Execute (interpretate) `.gofbc` bytecode file.
+- Compile `.gofbc` bytecode file to assembly file (NASM x86_64) `.asm`
+
+## How to get bytecode.
+Bytecode compiled via Gofra-Lang core. Gorfa bytecode files have extension `.gofbc`. 
+
+*****
+## Preview
+![CLI Help](previews/cli.png)
